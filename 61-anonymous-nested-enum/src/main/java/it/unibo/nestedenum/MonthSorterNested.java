@@ -1,6 +1,5 @@
 package it.unibo.nestedenum;
 
-import java.io.IOException;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,26 +11,28 @@ import java.util.List;
 public final class MonthSorterNested implements MonthSorter {
 
     static enum Month{
-        JANUARY("January", 31),
-        FEBRUARY("February", 28),
-        MARCH("March", 31),
-        APRIL("April", 30),
-        MAY("May", 31),
-        JUNE("June", 30),
-        JULY("July", 31),
-        AUGUST("August", 31),
-        SEPTEMBER("September", 30),
-        OCTOBER("October", 31),
-        NOVEMBER("November", 30),
-        DECEMBER("December", 31),
-        FEBRUARY_L("February", 29);
+        JANUARY("January", 31, 1),
+        FEBRUARY("February", 28, 2),
+        MARCH("March", 31, 3),
+        APRIL("April", 30, 4),
+        MAY("May", 31, 5),
+        JUNE("June", 30, 6),
+        JULY("July", 31, 7),
+        AUGUST("August", 31, 8),
+        SEPTEMBER("September", 30, 9),
+        OCTOBER("October", 31, 10),
+        NOVEMBER("November", 30, 11),
+        DECEMBER("December", 31, 12),
+        FEBRUARY_L("February", 29, 2);
 
         private final String actualName;
         private final int days;
+        private final int number;
 
-        private Month(final String actualName, final int days){
+        private Month(final String actualName, final int days, final int number){
             this.actualName = actualName;
             this.days = days;
+            this.number = number;
         }
 
         public String getActualName(){
@@ -42,8 +43,9 @@ public final class MonthSorterNested implements MonthSorter {
             return this.days;
         }
 
-        public static Month fromString(String s) throws IOException{
-            s.toUpperCase();
+
+        public static Month fromString(String s) throws IllegalArgumentException {
+            s = s.toUpperCase();
             List<String> splitted = new LinkedList<>();
             List<Month> Matches = new LinkedList<>();
 
@@ -53,53 +55,21 @@ public final class MonthSorterNested implements MonthSorter {
                 }
             }
 
-            if ("JANUARY".contains(s)) {
-                Matches.add(JANUARY);
+            for (Month m : Month.values()) {
+                if (m != FEBRUARY_L && m.actualName.toUpperCase().contains(s)) {
+                    Matches.add(m);
+                } else {
+                    if (splitted.size() > 1 && "FEBRUARY".contains(splitted.get(0)) && "LEAP".contains(splitted.get(1))){
+                        Matches.add(FEBRUARY_L);
+                    } 
+                }
             }
-            else if ("FEBRUARY".contains(s)) {
-                Matches.add(FEBRUARY);
-            }
-            else if ("MARCH".contains(s)) {
-                Matches.add(MARCH);
-            }
-            else if ("APRIL".contains(s)) {
-                Matches.add(APRIL);
-            }
-            else if ("MAY".contains(s)) {
-                Matches.add(MAY);
-            }
-            else if ("JUNE".contains(s)) {
-                Matches.add(JUNE);
-            }
-            else if ("JULY".contains(s)) {
-                Matches.add(JULY);
-            }
-            else if ("AUGUST".contains(s)) {
-                Matches.add(AUGUST);
-            }
-            else if ("SEPTEMBER".contains(s)) {
-                Matches.add(SEPTEMBER);
-            }
-            else if ("OCTOBER".contains(s)) {
-                Matches.add(OCTOBER);
-            }
-            else if ("NOVEMBER".contains(s)) {
-                Matches.add(NOVEMBER);
-            }
-            else if ("DECEMBER".contains(s)) {
-                Matches.add(DECEMBER);
-            }
-            else if (splitted.size() > 1) {
-                if ("FEBRUARY".contains(splitted.get(0)) && "LEAP".contains(splitted.get(1))){
-                    Matches.add(FEBRUARY_L);
-                } 
-            } 
 
             if (Matches.size() == 0){
-                throw new IOException("no matches");
+                throw new IllegalArgumentException("no matches");
             } 
             else if (Matches.size() > 1) {
-                throw new IOException("too much matches");
+                throw new IllegalArgumentException("too much matches");
             }
             else {
                 return Matches.get(0);
@@ -109,13 +79,40 @@ public final class MonthSorterNested implements MonthSorter {
         
     }
 
+
+    static class SortByMonthOrder implements Comparator<String> {
+        public int compare (String a, String b) {
+            if (Month.fromString(a).number > Month.fromString(b).number) {
+                return 1;
+            }
+            else if (Month.fromString(a).number == Month.fromString(b).number) {
+                return 0;
+            } else {
+                return -1;
+            }
+        }
+    }
+
+    static class SortByDate implements Comparator<String> {
+        public int compare (String a, String b) {
+            if (Month.fromString(a).days > Month.fromString(b).days) {
+                return 1;
+            }
+            else if (Month.fromString(a).days == Month.fromString(b).days) {
+                return 0;
+            } else {
+                return -1;
+            }
+        }
+    }
+
     @Override
     public Comparator<String> sortByDays() {
-        return null;
+        return new SortByDate();
     }
 
     @Override
     public Comparator<String> sortByOrder() {
-        return null;
+        return new SortByMonthOrder();
     }
 }
