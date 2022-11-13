@@ -4,6 +4,7 @@ import it.unibo.mvc.api.DrawNumber;
 import it.unibo.mvc.api.DrawNumberController;
 import it.unibo.mvc.api.DrawNumberView;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -23,6 +24,7 @@ public final class DrawNumberControllerImpl implements DrawNumberController {
      */
     public DrawNumberControllerImpl(final DrawNumber model) {
         this.model = model;
+        this.views = new LinkedList<>();
     }
 
     @Override
